@@ -1,13 +1,18 @@
-import tqdm # for timing
-import re # for string matching
-import csv
 import datetime # for number of days since 1900 conversion
 
+# function to help check if value is an integer
+def isInt(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
 
+# date cleansing function
 def dateCleanse(txt_file):
     f = open(txt_file, "r") # open the text file
     lines = f.read().split("\n") # define delimiter for each line
-    formatted = []
+    formatted = [] # array to store formatted values
     for line in lines:
 
         if any(character.isalpha() for character in line): # if there are any characters in the line
@@ -15,6 +20,21 @@ def dateCleanse(txt_file):
 
         elif line == '': # if the line is blank
             formatted.append('NA') # recode to NA
+
+        elif len(line) == 19: # if 2016-mm-yy 00:00:00 (Somebody supposedly modified this format before)
+            spaceSplit = line.split(' ')
+            spaceSplit = spaceSplit[0] #Remove 00:00:00
+            split = spaceSplit.split('-')
+            month = split[1] #Checked: No month is greater than 12
+           # yearTemp = split[0]
+           # if int(yearTemp) != 2016:
+               # print(split)
+               # print(yearTemp) ##@NOTE: Problem here: We are assuming that the 2016 at beginning of format is because
+                                ## somebody modified the dates. But have dates not equal to 2016.
+                                ## So is the format really yyyy-dd-mm or yyyy-mm-dd????
+            year = "20" + split[2]
+            date = month + "/01/" + year
+            formatted.append(date)
 
         elif len(line) == 7:
             if '/' in line and ' ' not in line: # if yyyy/mm or mm/yyyy
@@ -134,36 +154,15 @@ def dateCleanse(txt_file):
             #@Note: Added to ensure not missing cases
             else:
                 formatted.append('NA')
-
-        elif len(line) == 19: #if 2016-mm-yy 00:00:00 (Somebody supposedly modified this format before)
-            spaceSplit = line.split(' ')
-            spaceSplit = spaceSplit[0] #Remove 00:00:00
-            split = spaceSplit.split('-')
-            month = split[1] #Checked: No month is greater than 12
-           # yearTemp = split[0]
-           # if int(yearTemp) != 2016:
-               # print(split)
-               # print(yearTemp) ##@NOTE: Problem here: We are assuming that the 2016 at beginning of format is because
-                                ## somebody modified the dates. But have dates not equal to 2016.
-                                ##So is the format really yyyy-dd-mm or yyyy-mm-dd????
-            year = "20" + split[2]
-            date = month + "/01/" + year
-            formatted.append(date)
-
-
         else:
-            #formatted.append(line) # include the original value if it does not meet these use cases
-            formatted.append('NA') #Add NA for now, we just have about 15 cases here now.
+            formatted.append('NA') # add NA for remaining cases
 
-
-
-
-    #Check for erroneous errors (e.g. month > 12)
-    #For now let's do all of this here
+    # check for erroneous errors (e.g. month > 12)
+    # for now let's do all of this here
     for index, date in enumerate(formatted):
-        if '/' in date: #Take  dates only and not NAs
+        if '/' in date: # Take dates only and not NAs
             split = date.split('/')
-            #Check if month can be converted to int
+            # Check if month can be converted to int
             month = split[0]
             if isInt(month):
                 month = int(month)
@@ -172,26 +171,10 @@ def dateCleanse(txt_file):
             else:
                 formatted[index] = 'NA'
 
-    #NOTE: TEST LENGTH Length is now the same
-    #print(len(lines))
-    #print(len(formatted))
-
     # write formatted contents to csv
     with open('newDates.csv', 'w') as export:
         for i in formatted: # for every entry in the formatted array
             export.write(i) # write the entry to the file
             export.write('\n') # write a new line
 
-#Function to help check if value is an integer
-def isInt(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-
-
 words = dateCleanse('dates.csv')
-
-
