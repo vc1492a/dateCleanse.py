@@ -1,6 +1,7 @@
 import tqdm # for timing
 import re # for string matching
 import csv
+import datetime # for number of days since 1900 conversion
 
 
 def dateCleanse(txt_file):
@@ -9,144 +10,120 @@ def dateCleanse(txt_file):
     formatted = []
     for line in lines:
 
-        if line.isalpha(): # if anything is entirely string
+        if any(character.isalpha() for character in line): # if there are any characters in the line
             formatted.append('NA') # recode to NA
 
-        elif line.strip() == '': # if the line is blank
+        elif line == '': # if the line is blank
             formatted.append('NA') # recode to NA
 
-        elif len(line) == 7 and '/' in line and ' ' not in line: # if yyyy/mm or mm/yyyy
-            split = line.split('/')
-            year = 0
-            month = 0
-            if len(split[0]) == 4 or len(split[1]) == 4:
+        elif len(line) == 7:
+            if '/' in line and ' ' not in line: # if yyyy/mm or mm/yyyy
+                split = line.split('/')
+                if len(split[0]) == 4: # if the year is before /
+                    year = split[0]
+                    month = split[1]
+                    date = str(month) + "/01/" + str(year)
+                    formatted.append(date)
+                elif len(split[0]) == 2: # if the month is before /
+                    year = split[1]
+                    month = split[0]
+                    date = str(month) + "/01/" + str(year)
+                    formatted.append(date)
+            if '-' in line and ' ' not in line: # if yyyy-mm
+                split = line.split('-')
                 year = split[0]
-                if len(year) == 2:
-                    year = "20" + year
-            elif len(split[0]) == 2 or len(split[1]) == 2:
-                month = split[0]
-            date = str(month) + "/01/" + str(year)
-            formatted.append(date)
-
-        elif len(line) == 5 and '/' in line: # if yy/mm
-            split = line.split('/')
-            if split[0].isalpha() or split[1].isalpha():
-                formatted.append('NA')
-            elif split[0] == '00' or split[1] == '00' or split[0] == '0' or split[1] == '0':
-                formatted.append('NA')
-            elif split[0] == '??' or split[1] == '??':
-                formatted.append('NA')
-            else:
-                year = "20" + split[0] # assume these years are after year 2000
                 month = split[1]
                 date = str(month) + "/01/" + str(year)
                 formatted.append(date)
 
-
-        elif len(line) == 5 and '-' in line: # if yy-mm
-            split = line.split('-')
-            if split[0] == "00" and split[1] == "00":
-                formatted.append("NA")
-            else:
-                year = "20" + split[0] # assume these years are after year 2000
-                month = split[1]
-                date = month + "/01/" + year
-                formatted.append(date)
-
-
-##### THIS SHOULD BE len(line) == 4
-# When changed, get error below ..
-
-        elif len(line) == 3 and '/' in line: # if m/yy
-            print(line)
-            if split[0].isalpha() or split[1].isalpha():
-                formatted.append('NA')
-            elif split[0] or split[1] == 'A':
-                formatted.append('NA')
-            else:
-                split = line.split('/')
-                year = "20" + split[1] # assume these years are after year 2000
-                month = split[0]
-                date = month + "/01/" + year
-                print(date)
-                formatted.append(date)
-
-        elif len(line) == 3 and '-' in line: # if yy-m
-            if split[0].isalpha() or split[1].isalpha():
-                formatted.append('NA')
-            elif split[0] or split[1] == '20N':
-                formatted.append('NA')
-            else:
+        elif len(line) == 6:
+            if line[0] == "*" and '-' in line: # if *yy-mm
+                line = line[1:]  # remove the asterisk *
                 split = line.split('-')
-                propformat = 0
-                year = "20" + split[0] # assume these years are after year 2000
-                propformat += ((float(year) - 1900) * 365)
                 month = split[1]
-                propformat += float(month) * 30
-                propformat = str(round(propformat)).rstrip('.')
-                formatted.append(propformat)
+                year = "20" + split[0] # assume these years are after year 2000
+                date = month+"/01/"+year
+                formatted.append(date)
 
-        elif len(line) == 7 and '-' in line: # if yyyy-mm
-            split = line.split('-')
-            propformat = 0
-            year = split[0]
-            propformat += ((float(year) - 1900) * 365)
-            month = split[1]
-            propformat += float(month) * 30
-            propformat = str(round(propformat)).rstrip('.')
-            formatted.append(propformat)
-
-        elif len(line) == 3 and '-' not in line: # if myy:
-            if line[0] == 'N':
-                formatted.append('NA')
-            elif line[1] == '\\':
-                formatted.append('NA')
-            else:
-                month = line[0]
-                propformat = 0
-                propformat += float(month) * 30
-                year = str(line[1] + line[2])
-                if int(year) < 20:
-                    year = "20" + year # assume these years are after year 2000
-                    propformat = 0
-                    propformat += ((float(year) - 1900) * 365)
-                    propformat = str(round(propformat)).rstrip('.')
-                    formatted.append(propformat)
-                else:
+        elif len(line) == 5:
+            if line[0] == "4" and '/' not in line: # if ddddd (days since 01/01/1900)
+                date = datetime.date(1900, 1, 1) + datetime.timedelta(int(line)) # calculate date
+                date = date.strftime("%d/%m/%Y") # convert to proper format
+                formatted.append(date)
+            if '/' in line: # if yy/mm
+                split = line.split('/')
+                if split[0].isalpha() or split[1].isalpha():
                     formatted.append('NA')
+                elif split[0] == '00' or split[1] == '00' or split[0] == '0' or split[1] == '0':
+                    formatted.append('NA')
+                elif split[0] == '??' or split[1] == '??':
+                    formatted.append('NA')
+                else:
+                    year = "20" + split[0] # assume these years are after year 2000
+                    month = split[1]
+                    date = str(month) + "/01/" + str(year)
+                    formatted.append(date)
+            if '-' in line: # if yy-mm
+                split = line.split('-')
+                if split[0] == "00" and split[1] == "00":
+                    formatted.append("NA")
+                else:
+                    year = "20" + split[0] # assume these years are after year 2000
+                    month = split[1]
+                    date = month + "/01/" + year
+                    formatted.append(date)
 
-        elif len(line) == 6 and line[0] == "*" and '-' in line: # if *yy-mm
-            #remove the *
-            line = line[1:]
-            split = line.split('-')
-            propformat = 0
-            month = split[1]
-            year = "20" + split[0]
-            date = month+"/01/"+year
-
-        elif len(line) == 4 and line.isdigit(): #yymm or yyyy
-            # Check if yymm or yyyy
-            if line[0] + line[1] == "20": #yyyy
-                date = "01/01/"+line
-            elif line[0] + line[1] > "20":
-                date = 'NA'
-            else: # yymm
-                year = "20" + line[:2]
-                month = line[2:4]
+        elif len(line) == 4:
+            if line.isdigit(): # if yymm or yyyy
+                if line[0] + line[1] == "20": # yyyy
+                    date = "01/01/" + line # if only year value, assign to first day of year
+                    formatted.append(date)
+                elif line[0] + line[1] > "20":
+                    formatted.append('NA') # if greater than 20, date value unknown
+                else: # yymm
+                    year = "20" + line[:2] # assume these years are after year 2000
+                    month = line[2:4]
+                    date = month + "/01/" + year
+                    formatted.append(date)
+            if '/' in line: # if m/yy
+                split = line.split('/')
+                year = "20" + split[0] # assume these years are after year 2000
+                month = split[1]
                 date = month + "/01/" + year
+                formatted.append(date)
+            if '-' in line and line[1] == '-': # if m-yy
+                split = line.split('-')
+                year = "20" + split[0] # assume these years are after year 2000
+                month = split[1]
+                date = month + "/01/" + year
+                formatted.append(date)
+            if '-' in line and line[2] == '-': # if yy-m
+                split = line.split('-')
+                if split[0] == '00' or split[1] == '00' or split[0] == '0' or split[1] == '0':
+                    formatted.append('NA')
+                else:
+                    year = "20" + split[0] # assume these years are after year 2000
+                    month = split[1]
+                    date = month + "/01/" + year
+                    formatted.append(date)
 
-        ## remaining use cases
-        # 0-0
-        # 2016-9-01 00:00:00
+        elif len(line) == 3:
+            if '-' not in line: # if myy:
+                if line[1] == '\\':
+                    formatted.append('NA')
+                else:
+                    month = line[0]
+                    year = "20" + str(line[1] + line[2])
+                    date = month + "/01/" + year
+                    formatted.append(date)
 
         else:
             formatted.append(line) # include the original value if it does not meet these use cases
 
-    #for i in formatted:
-     #   print(i)
-
-    return formatted
+    # write formatted contents to csv
+    with open('newDates.csv', 'w') as export:
+        for i in formatted: # for every entry in the formatted array
+            export.write(i) # write the entry to the file
+            export.write('\n') # write a new line
 
 words = dateCleanse('dates.csv')
-
-#print(words)
