@@ -157,11 +157,6 @@ def dateCleanse(txt_file):
 
 
 
-    #NOTE: TEST LENGTH Length is now the same
-    #print(len(lines))
-    #print(len(formatted))
-
-
 
     #Check for erroneous errors (e.g. month > 12)
     #For now let's do all of this here
@@ -177,7 +172,9 @@ def dateCleanse(txt_file):
             else:
                 formatted[index] = 'NA'
 
-
+    #NOTE: TEST LENGTH Length is now the same
+    #print(len(lines))
+    #print(len(formatted))
 
     # write formatted contents to csv
     with open('newDates.csv', 'w') as export:
