@@ -1,5 +1,4 @@
 # dateCleanse.py
-============================
 
 dateCleanse.py takes a variety of date formats and converts them to a common format: MM/DD/YYYY. This tool is 
 still in alpha. Development pace will coincide with its frequency of use for date cleansing in different applications.
