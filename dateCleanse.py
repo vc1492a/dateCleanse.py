@@ -81,6 +81,9 @@ def dateCleanse(txt_file):
                     month = split[1]
                     date = month + "/01/" + year
                     formatted.append(date)
+            #@Note: Added to ensure not missing cases
+            else:
+                formatted.append('NA')
 
         elif len(line) == 4:
             if line.isdigit(): # if yymm or yyyy
@@ -154,10 +157,27 @@ def dateCleanse(txt_file):
 
 
 
-    #NOTE: Length is not the same.
-    #At the end of every statement, will add a else: format.append('NA') to ensure all cases are being printed for now.
-    print(len(lines))
-    print(len(formatted))
+    #NOTE: TEST LENGTH Length is now the same
+    #print(len(lines))
+    #print(len(formatted))
+
+
+
+    #Check for erroneous errors (e.g. month > 12)
+    #For now let's do all of this here
+    for index, date in enumerate(formatted):
+        if '/' in date: #Take  dates only and not NAs
+            split = date.split('/')
+            #Check if month can be converted to int
+            month = split[0]
+            if isInt(month):
+                month = int(month)
+                if month > 12 or month <= 0: #Check if have months not between 1 and 12
+                    formatted[index] = 'NA'
+            else:
+                formatted[index] = 'NA'
+
+
 
     # write formatted contents to csv
     with open('newDates.csv', 'w') as export:
@@ -165,4 +185,16 @@ def dateCleanse(txt_file):
             export.write(i) # write the entry to the file
             export.write('\n') # write a new line
 
+#Function to help check if value is an integer
+def isInt(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+
 words = dateCleanse('dates.csv')
+
+
