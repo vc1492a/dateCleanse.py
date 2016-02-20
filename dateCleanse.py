@@ -29,12 +29,18 @@ def dateCleanse(txt_file):
                     month = split[0]
                     date = str(month) + "/01/" + str(year)
                     formatted.append(date)
-            if '-' in line and ' ' not in line: # if yyyy-mm
+                #@Note: Added to ensure not missing cases
+                else:
+                    formatted.append('NA')
+            elif '-' in line and ' ' not in line: # if yyyy-mm
                 split = line.split('-')
                 year = split[0]
                 month = split[1]
                 date = str(month) + "/01/" + str(year)
                 formatted.append(date)
+            #@Note: Added to ensure not missing cases
+            else:
+                 formatted.append('NA')
 
         elif len(line) == 6:
             if line[0] == "*" and '-' in line: # if *yy-mm
@@ -44,13 +50,16 @@ def dateCleanse(txt_file):
                 year = "20" + split[0] # assume these years are after year 2000
                 date = month+"/01/"+year
                 formatted.append(date)
+            #@Note: Added to ensure not missing cases
+            else:
+                formatted.append('NA')
 
         elif len(line) == 5:
             if line[0] == "4" and '/' not in line: # if ddddd (days since 01/01/1900)
                 date = datetime.date(1900, 1, 1) + datetime.timedelta(int(line)) # calculate date
                 date = date.strftime("%d/%m/%Y") # convert to proper format
                 formatted.append(date)
-            if '/' in line: # if yy/mm
+            elif '/' in line: # if yy/mm
                 split = line.split('/')
                 if split[0].isalpha() or split[1].isalpha():
                     formatted.append('NA')
@@ -63,7 +72,7 @@ def dateCleanse(txt_file):
                     month = split[1]
                     date = str(month) + "/01/" + str(year)
                     formatted.append(date)
-            if '-' in line: # if yy-mm
+            elif '-' in line: # if yy-mm
                 split = line.split('-')
                 if split[0] == "00" and split[1] == "00":
                     formatted.append("NA")
@@ -85,19 +94,19 @@ def dateCleanse(txt_file):
                     month = line[2:4]
                     date = month + "/01/" + year
                     formatted.append(date)
-            if '/' in line: # if m/yy
+            elif '/' in line: # if m/yy
                 split = line.split('/')
                 year = "20" + split[0] # assume these years are after year 2000
                 month = split[1]
                 date = month + "/01/" + year
                 formatted.append(date)
-            if '-' in line and line[1] == '-': # if m-yy
+            elif '-' in line and line[1] == '-': # if m-yy
                 split = line.split('-')
                 year = "20" + split[0] # assume these years are after year 2000
                 month = split[1]
                 date = month + "/01/" + year
                 formatted.append(date)
-            if '-' in line and line[2] == '-': # if yy-m
+            elif '-' in line and line[2] == '-': # if yy-m
                 split = line.split('-')
                 if split[0] == '00' or split[1] == '00' or split[0] == '0' or split[1] == '0':
                     formatted.append('NA')
@@ -106,6 +115,9 @@ def dateCleanse(txt_file):
                     month = split[1]
                     date = month + "/01/" + year
                     formatted.append(date)
+            #@Note: Added to ensure not missing cases
+            else:
+                formatted.append('NA')
 
         elif len(line) == 3:
             if '-' not in line: # if myy:
@@ -116,9 +128,36 @@ def dateCleanse(txt_file):
                     year = "20" + str(line[1] + line[2])
                     date = month + "/01/" + year
                     formatted.append(date)
+            #@Note: Added to ensure not missing cases
+            else:
+                formatted.append('NA')
+
+        elif len(line) == 19: #if 2016-mm-yy 00:00:00 (Somebody supposedly modified this format before)
+            spaceSplit = line.split(' ')
+            spaceSplit = spaceSplit[0] #Remove 00:00:00
+            split = spaceSplit.split('-')
+            month = split[1] #Checked: No month is greater than 12
+           # yearTemp = split[0]
+           # if int(yearTemp) != 2016:
+               # print(split)
+               # print(yearTemp) ##@NOTE: Problem here: We are assuming that the 2016 at beginning of format is because
+                                ## somebody modified the dates. But have dates not equal to 2016.
+                                ##So is the format really yyyy-dd-mm or yyyy-mm-dd????
+            year = "20" + split[2]
+            date = month + "/01/" + year
+            formatted.append(date)
+
 
         else:
-            formatted.append(line) # include the original value if it does not meet these use cases
+            #formatted.append(line) # include the original value if it does not meet these use cases
+            formatted.append('NA') #Add NA for now, we just have about 15 cases here now.
+
+
+
+    #NOTE: Length is not the same.
+    #At the end of every statement, will add a else: format.append('NA') to ensure all cases are being printed for now.
+    print(len(lines))
+    print(len(formatted))
 
     # write formatted contents to csv
     with open('newDates.csv', 'w') as export:
