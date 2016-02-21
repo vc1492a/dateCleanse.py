@@ -50,4 +50,5 @@ Cleansed dates will be in a new file called *newDates.csv* contained in the same
 - Ensure robust behavior in different use cases
 - Toggle the post-2000 assumption on or off
 - Ensure extra line at the end of new csv file is not printed
-
+- Allow batch processing of more than one input file
+- Allow processing of multiple columns of data
