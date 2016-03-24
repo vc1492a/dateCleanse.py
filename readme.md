@@ -1,6 +1,6 @@
 # dateCleanse.py
 
-dateCleanse.py takes a variety of date formats and converts them to a single, common format: MM/DD/YYYY. 
+dateCleanse.py converts a variety of date formats and to a single, common format: MM/DD/YYYY.
 
 This tool is still in alpha. Development pace will coincide with its frequency of use for date cleansing in 
 different applications. Written and tested in Python 3.4.3. 
@@ -31,7 +31,7 @@ format included for future release, please let us know or submit a pull request.
 
 ## How-To
 
-If you are using R, export the column from your data frame or your vector of dates as follows:
+If you are using R, export the column from your datas frame or your vectors of dates as follows, into the same directory:
 
 ```r
 write.csv(dates, "name_of_file.csv", row.names=FALSE, quote=FALSE)
@@ -50,10 +50,10 @@ your *name_of_file.csv* file in the same directory, simply type:
 ```python
 name_of_file.csv
 ```
+and hit enter.
 
-If your file is located in another directory, be sure to specify the correct file path. Then hit enter. The script
-will begin reformatting the date values and show a progress bar. Once the process complete, cleansed dates are stored in
- a new file called *newDates.csv*, contained in the same directory as *dateCleanse.py*. 
+The script will begin reformatting the date values and show a progress bar. Once the process complete, cleansed dates 
+are stored in a new file called *newDates.csv*, contained in the same directory as *dateCleanse.py*. 
 
 ## Dependencies
 
@@ -66,3 +66,4 @@ will begin reformatting the date values and show a progress bar. Once the proces
 - Ensure extra line at the end of new csv file is not printed
 - Allow batch processing of more than one input file
 - Allow processing of multiple columns of data
+- Multiprocessing for increased performance
