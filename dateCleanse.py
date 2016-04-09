@@ -1,9 +1,11 @@
-# ask user to define file path
-file_path = input("\nEnter the file path: ")
-
 # for number of days since 1900 conversion
 import datetime
 from tqdm import tqdm
+import csv
+
+# ask user to define file path
+file_path = input("\nEnter the file path: ")
+
 
 # function to help check if value is an integer
 def is_int(s):
@@ -176,10 +178,11 @@ def date_cleanse(txt_file):
 
         # write formatted contents to csv
         with open('newDates.csv', 'w') as export:
+            writer = csv.writer(export)
             print('Saving the reformatted date values...')
             for i in tqdm(formatted): # for every entry in the formatted array
-                export.write(i) # write the entry to the file
-                export.write('\n') # write a new line
+                row = [i]
+                writer.writerow(row) # write the entry to the file
 
         print('\nConversion complete. Formatted dates stored in "newDates.csv".\n')
 
