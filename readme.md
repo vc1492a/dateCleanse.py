@@ -2,8 +2,8 @@
 
 dateCleanse.py converts a variety of date formats and to a single, common format: MM/DD/YYYY.
 
-This tool is still in alpha. Development pace will coincide with its frequency of use for date cleansing in 
-different applications. Written and tested in Python 3.4.3. 
+Development pace will coincide with its frequency of use for date cleansing in 
+different applications, but this tool is ready for use. Written and tested in Python 3.4.3. 
 
 ## Currently Supported Date Formats
 
@@ -22,7 +22,7 @@ different applications. Written and tested in Python 3.4.3.
 - MYY
 - YYYY-M-DD HH:MM:SS
     
-Note that two-digit years are assumed to occur post year 2000 and that dates are assumed to occur post 1930 at this time.  
+Note that two-digit years are assumed to occur post year 2000 and that all dates are assumed to occur post 1930.  
 
 ## Date Formats for Future Release
 
@@ -63,9 +63,4 @@ cleansed dates are stored in a new file called *newDates.csv*, contained in a ne
 ## Non-native Dependencies
 
 - tqdm
-
-### To-Do
     
-- Toggle the post-2000 assumption on or off
-- Allow processing of multiple columns of data
-- Multiprocessing for increased performance
